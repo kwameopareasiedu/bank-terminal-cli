@@ -1,0 +1,3 @@
+[submodule "libs/libbcrypt"]
+	path = libs/libbcrypt
+	url = git@github.com:trusch/libbcrypt.git
