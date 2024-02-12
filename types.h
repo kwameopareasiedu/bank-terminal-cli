@@ -4,6 +4,7 @@
 #define QUERY_BUF_SIZE 512
 #define CMD_BUF_SIZE 512
 
+#define CMD_REGISTER "register"
 #define CMD_LOGIN "login"
 #define CMD_DETAILS "details"
 #define CMD_ADD_FUNDS "fund"

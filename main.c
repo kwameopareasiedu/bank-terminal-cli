@@ -23,7 +23,41 @@ int main() {
         show_prompt(terminal_get_user());
         get_input(cmd, CMD_BUF_SIZE);
 
-        if (strcmp(cmd, CMD_LOGIN) == 0) {
+        if (strcmp(cmd, CMD_REGISTER) == 0) {
+            if (terminal_get_user() != NULL) {
+                fprintf(stderr, "Already logged in. Logout first!\n");
+                continue;
+            }
+
+            char first_name[CMD_BUF_SIZE], last_name[CMD_BUF_SIZE],
+                    email[CMD_BUF_SIZE], pass[CMD_BUF_SIZE], confirm_pass[CMD_BUF_SIZE];
+
+            printf("\tFirst name: ");
+            get_input(first_name, CMD_BUF_SIZE);
+            printf("\tLast name: ");
+            get_input(last_name, CMD_BUF_SIZE);
+            printf("\tEmail: ");
+            get_input(email, CMD_BUF_SIZE);
+            printf("\tPassword (Input will be hidden): ");
+            get_hidden_input(pass, CMD_BUF_SIZE);
+            printf("\tConfirm password (Input will be hidden): ");
+            get_hidden_input(confirm_pass, CMD_BUF_SIZE);
+
+            if (strlen(first_name) == 0) {
+                fprintf(stderr, "First name is required!\n");
+            } else if (strlen(last_name) == 0) {
+                fprintf(stderr, "Last name is required!\n");
+            } else if (!is_email_valid(email)) {
+                fprintf(stderr, "Email is not valid!\n");
+            } else if (strlen(pass) < 6) {
+                fprintf(stderr, "Password must be at least six (6) characters!\n");
+            } else if (strcmp(pass, confirm_pass) != 0) {
+                fprintf(stderr, "Passwords must match!\n");
+            } else {
+                if (terminal_register(first_name, last_name, email, pass)) printf("Success!\n");
+                else fprintf(stderr, "Register failed!\n");
+            }
+        } else if (strcmp(cmd, CMD_LOGIN) == 0) {
             if (terminal_get_user() != NULL) {
                 fprintf(stderr, "Already logged in. Logout first!\n");
                 continue;
@@ -38,7 +72,7 @@ int main() {
             terminal_authenticate(email, pass);
 
             if (terminal_get_user() != NULL) printf("Success!\n");
-            else printf("Login failed!\n");
+            else fprintf(stderr, "Login failed!\n");
         } else if (strcmp(cmd, CMD_DETAILS) == 0) {
             CHECK_AUTHENTICATED_USER
             terminal_print_user_details();
@@ -78,6 +112,7 @@ int main() {
             printf(""
                    "Bank terminal CLI - Help\n"
                    "\n"
+                   "register    - Create account\n"
                    "login       - Login with email and password\n"
                    "* details   - Display account details\n"
                    "* fund      - Add funds to account\n"

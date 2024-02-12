@@ -8,6 +8,42 @@
 
 static user_t *auth_user;
 
+bool terminal_register(char *first_name, char *last_name, char *email, char *password) {
+    char check_query[QUERY_BUF_SIZE];
+    sprintf(check_query, "SELECT id FROM users WHERE email='%s' LIMIT 1;", email);
+
+    PGconn *conn = db_get_connection();
+    PGresult *check_res = PQexec(conn, check_query);
+    ExecStatusType check_status = PQresultStatus(check_res);
+
+    if (check_status != PGRES_TUPLES_OK) {
+        fprintf(stderr, "Unable to check existing email: %s", PQerrorMessage(conn));
+        return false;
+    } else if (PQntuples(check_res) > 0) {
+        fprintf(stderr, "Email already exists\n");
+        return false;
+    }
+
+    char hash_salt[96];
+    char hashed_pass[96];
+    bcrypt_gensalt(10, hash_salt);
+    bcrypt_hashpw(password, hash_salt, hashed_pass);
+
+    char insert_query[QUERY_BUF_SIZE];
+    sprintf(insert_query, "INSERT INTO users(first_name,last_name,email,password) VALUES('%s','%s','%s','%s');",
+            first_name, last_name, email, hashed_pass);
+
+    PGresult *insert_res = PQexec(conn, insert_query);
+    ExecStatusType insert_status = PQresultStatus(insert_res);
+
+    if (insert_status != PGRES_COMMAND_OK) {
+        fprintf(stderr, "Unable to register user: %s", PQerrorMessage(conn));
+        return false;
+    }
+
+    return terminal_authenticate(email, password);
+}
+
 bool terminal_authenticate(char *email, char *pass) {
     char query[QUERY_BUF_SIZE];
     sprintf(query, "SELECT * FROM users WHERE email='%s' LIMIT 1;", email);
@@ -78,7 +114,7 @@ void terminal_print_user_records() {
         return;
     }
 
-    int record_count;
+    int record_count = 0;
     record_t *records = terminal_get_records(&record_count);
 
     printf("%d record%s\n", record_count, record_count == 1 ? "" : "s");

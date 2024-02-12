@@ -4,6 +4,8 @@
 #ifndef TERMINAL
 #define TERMINAL
 
+bool terminal_register(char *first_name, char *last_name, char *email, char *password);
+
 bool terminal_authenticate(char *email, char *pass);
 
 user_t *terminal_get_user();

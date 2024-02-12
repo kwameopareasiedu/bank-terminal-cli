@@ -63,3 +63,5 @@ After building the targets in the previous section, you should have 2 executable
 With our database setup, run the app using `./bank_terminal_cli`. You should see this in your console output:
 
 ![](./docs/cli.png)
+
+Type `help` to see the list of supported commands.
